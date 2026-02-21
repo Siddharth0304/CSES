@@ -2,27 +2,30 @@
 using namespace std;
  
 int mod=1e9+7;
-
-int helper(vector<int> &nums, int n, int m, int idx, int prev, vector<vector<long long>> &dp){
-    if(idx==n)
-        return 1;
-    if(dp[idx][prev]!=-1)
-        return dp[idx][prev];
-    long long ans=0;
-    if(nums[idx]==0){
-        for(int i=1;i<=m;i++){
-            if(idx==0 || (abs(i-prev)<=1))
-                ans=(ans+helper(nums,n,m,idx+1,i,dp))%mod;
+int countWays(vector<int> &nums,int n,int m){
+    vector<vector<long long>> dp(n+1,vector<long long> (m+1,0));
+    for(int i=1;i<=m;i++){
+        if(nums[0]==0 || nums[0]==i)
+            dp[1][i]=1;
+    }
+    
+    for(int i=2;i<=n;i++){
+        for(int k=1;k<=m;k++){
+            if(nums[i-1]!=0 && nums[i-1]!=k){
+                dp[i][k]=0;
+                continue;
+            }
+            
+            for(int prev=k-1;prev<=k+1;prev++){
+                if(prev>=1 && prev<=m)
+                    dp[i][k]=(dp[i][k]+dp[i-1][prev])%mod;
+            }
         }
     }
-    else if(idx==0 || (abs(nums[idx]-prev)<=1))
-        ans=(ans+helper(nums,n,m,idx+1,nums[idx],dp))%mod;
-    return dp[idx][prev]=ans;
-}
-
-int countWays(vector<int> &nums,int n,int m){
-    vector<vector<long long>> dp(n+1,vector<long long> (m+1,-1));
-    return helper(nums,n,m,0,0,dp);
+    long long ans=0;
+    for(int i=1;i<=m;i++)
+        ans=(ans+dp[n][i])%mod;
+    return ans;
 }
  
 int main() {
